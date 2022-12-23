@@ -2,6 +2,9 @@
 
 Query your Postgres Database directly from the Browser.
 
+**Video**:  
+https://youtu.be/ohr9gBPC3cE
+
 **Download the latest binaries**:  
 https://github.com/yandeu/postgres-browser-proxy/releases
 
