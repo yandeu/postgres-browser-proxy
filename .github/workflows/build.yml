@@ -1,0 +1,183 @@
+# read:
+# - https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+# - https://trstringer.com/github-actions-create-release-upload-artifacts/
+# - https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs
+
+name: Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    # Map a step output to a job output
+    outputs:
+      output1: ${{ steps.create_release.outputs.upload_url }}
+
+    steps:
+      - name: Create Release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  build-linux:
+    runs-on: ubuntu-latest
+    needs: create-release
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          target: x86_64-unknown-linux-musl
+
+      - name: Parse README.md
+        run: |
+          npm ci
+          node ./scripts/parse-md.mjs
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features --target x86_64-unknown-linux-musl
+
+      - name: Publish
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux
+          path: ./target/x86_64-unknown-linux-musl/release/postgres-browser-proxy
+
+      - name: Zip
+        run: zip -jr linux.zip ./target/x86_64-unknown-linux-musl/release/postgres-browser-proxy
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          upload_url: ${{ needs.create-release.outputs.output1 }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./linux.zip
+          asset_name: linux.zip
+          asset_content_type: application/zip
+
+  build-windows:
+    runs-on: windows-latest
+    needs: create-release
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Parse README.md
+        run: |
+          npm ci
+          node .\scripts\parse-md.mjs
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features
+
+      - name: Publish
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows
+          path: ./target/release/postgres-browser-proxy.exe
+
+      - name: Zip
+        run: Get-ChildItem -Path .\target\release\postgres-browser-proxy.exe | Compress-Archive -DestinationPath .\windows.zip -Force
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          upload_url: ${{ needs.create-release.outputs.output1 }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./windows.zip
+          asset_name: windows.zip
+          asset_content_type: application/zip
+
+  build-macos:
+    runs-on: macos-latest
+    needs: create-release
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Parse README.md
+        run: |
+          npm ci
+          node ./scripts/parse-md.mjs
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features
+
+      - name: Publish
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos
+          path: ./target/release/postgres-browser-proxy
+
+      - name: Zip
+        run: zip -jr macos.zip ./target/release/postgres-browser-proxy
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          upload_url: ${{ needs.create-release.outputs.output1 }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./macos.zip
+          asset_name: macos.zip
+          asset_content_type: application/zip

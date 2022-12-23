@@ -1,0 +1,14 @@
+[package]
+name = "postgres-browser-proxy"
+version = "0.0.1"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+postgres = { version = "0.19.4", default-features = false, features = ["with-chrono-0_4"] }
+chrono = { version = "0.4", default-features = false }
+threadpool = "1"
+clap = { version = "4", features = ["derive"] }
+r2d2_postgres = "0.18"
+r2d2 = "0.8"

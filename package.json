@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@yandeu/parse-markdown": "^0.0.2"
+  }
+}

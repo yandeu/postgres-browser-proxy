@@ -1,0 +1,6 @@
+{
+  "root": "example",
+  "ignore": [
+    "target"
+  ]
+}
