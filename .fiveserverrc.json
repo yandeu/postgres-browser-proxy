@@ -2,5 +2,6 @@
   "root": "example",
   "ignore": [
     "target"
-  ]
+  ],
+  "wait": 1000
 }
