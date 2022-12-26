@@ -27,7 +27,36 @@ export const query = async query => {
 
 /**
  *
- * @param {String} query
+ * @param {Array<Object.<string, any>>} rows
+ * @returns {HTMLTableElement|void}
+ */
+export const toTable = rows => {
+  if (Array.isArray(rows)) {
+    let table = '<table>'
+    table += '<thead><tr>'
+    table += Object.keys(rows[0])
+      .map(key => `<th>${key}</th>`)
+      .join('')
+    table += '</tr></thead><tbody>'
+    for (const row of rows) {
+      table += '<tr>'
+      table += Object.values(row)
+        .map(value => `<td>${value}</td>`)
+        .join('')
+      table += '</tr>'
+    }
+    table += '</tbody></table>'
+    const el = /** @type {HTMLTableElement} */ (document.createElement('table'))
+    el.innerHTML = table
+    return el
+  } else {
+    showError(null, 'toTable() failed. Argument is not an Array.')
+  }
+}
+
+/**
+ *
+ * @param {String|null} query
  * @param {String} error
  */
 const showError = (query, error) => {
@@ -59,6 +88,7 @@ const showError = (query, error) => {
     font-size: 16px;
     border-radius: 4px;`
   )
-  errorEl.innerHTML = error + '<br/><br/>' + '<span><small>' + query + '</small></span>'
+  errorEl.innerHTML = error
+  if (query) errorEl.innerHTML += '<br/><br/>' + '<span><small>' + query + '</small></span>'
   wrapper.append(errorEl)
 }

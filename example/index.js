@@ -1,7 +1,7 @@
 // @ts-check
 
 // @ts-ignore
-import { query } from 'http://localhost:3000/query.js'
+import { query, toTable } from 'http://localhost:3000/query.js'
 
 await query(/*sql*/ `DROP TABLE users;`)
 
@@ -28,5 +28,7 @@ console.log(users)
 
 const code = /** @type {HTMLElement} */ (document.querySelector('code'))
 code.innerHTML = JSON.stringify(users, null, 2)
+
+document.body.append(toTable(users))
 
 export {}
