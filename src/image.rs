@@ -43,7 +43,7 @@ pub fn crop_image(filepath: String) -> Result<String, Box<dyn Error>> {
             let mut buffer = Vec::<u8>::new();
 
             println!("file: {}", filepath);
-            let b64 = base64::decode_engine_vec(
+            base64::decode_engine_vec(
                 filepath.trim(),
                 &mut buffer,
                 &base64::engine::DEFAULT_ENGINE,
@@ -52,7 +52,7 @@ pub fn crop_image(filepath: String) -> Result<String, Box<dyn Error>> {
             image::load_from_memory(&buffer).expect("should load from memory")
         }
         Input::File => {
-            let binding = filepath.split(".").collect::<Vec<&str>>();
+            let binding = filepath.split('.').collect::<Vec<&str>>();
             let ext = binding.last().unwrap();
             let format = image::ImageFormat::from_extension(ext).unwrap();
             let file = File::open(filepath)?;
