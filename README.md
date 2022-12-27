@@ -50,7 +50,7 @@ Options:
 
 ## Example
 
-It looks like this in you client-side javascript.  
+It looks like this in your client-side javascript.  
 _More examples are in the [examples directory](./examples)._
 
 ```js
