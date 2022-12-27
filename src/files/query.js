@@ -26,7 +26,7 @@ export const query = async query => {
 }
 
 /**
- *
+ * Will crop any image to 256x256 (max. 3mb)
  * @param {String} base64
  * @returns {Promise<String>}
  */
@@ -47,7 +47,7 @@ export const cropImage = async base64 => {
 }
 
 /**
- *
+ * Converts a SQL Row to an HTMLFormElement
  * @param {SubmitEvent} event
  * @returns {Object.<string, any>}
  */
