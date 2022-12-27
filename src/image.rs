@@ -24,8 +24,9 @@ pub enum Input {
     Base64,
 }
 
+// 6224
 pub fn crop_image(filepath: String) -> Result<String, Box<dyn Error>> {
-    const TARGET_SIZE: u32 = 128;
+    const TARGET_SIZE: u32 = 256;
 
     let input_mode = Input::Base64;
     let output_mode = Output::Base64;
@@ -103,10 +104,12 @@ pub fn crop_image(filepath: String) -> Result<String, Box<dyn Error>> {
 
             img.write_to(&mut writer, format)
                 .expect("should write to buffer");
-            let img_buf = writer.buffer();
+
+            let img_cursor = writer.into_inner().unwrap();
+            let img_u8q = img_cursor.into_inner();
 
             // data:image/jpeg;base64,HEX
-            let base64 = base64::encode(img_buf);
+            let base64 = base64::encode(img_u8q);
 
             Ok(format!("{}{}", "data:image/jpeg;base64,", base64))
         }

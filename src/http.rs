@@ -1,7 +1,7 @@
 use std::{io::Read, net::TcpStream};
 
 pub fn parse_request(stream: &mut TcpStream) -> (String, String) {
-    let mut buffer = [0; 1024 * 128];
+    let mut buffer = [0; 1024 * 64];
     stream.read(&mut buffer).unwrap();
     let request_str = std::str::from_utf8(&buffer).unwrap();
 
