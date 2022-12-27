@@ -1,12 +1,24 @@
 use std::{io::Read, net::TcpStream};
 
 pub fn parse_request(stream: &mut TcpStream) -> (String, String) {
-    let mut buffer = [0; 2048];
+    let mut buffer = [0; 1024 * 64];
     stream.read(&mut buffer).unwrap();
     let request_str = std::str::from_utf8(&buffer).unwrap();
 
     let lines: Vec<String> = request_str.lines().map(|line| line.to_string()).collect();
     let request_line = lines.first().unwrap().to_string();
+
+    // read more from stream if uploading an image
+    let lines = match request_line.starts_with("POST /crop-image") {
+        true => {
+            let mut buffer = [0; 1024 * 1024 * 3];
+            stream.read(&mut buffer).unwrap();
+            let request_str = format!("{}{}", request_str, std::str::from_utf8(&buffer).unwrap());
+            let lines: Vec<String> = request_str.lines().map(|line| line.to_string()).collect();
+            lines
+        }
+        false => lines,
+    };
 
     // get body
     let mut collect = false;

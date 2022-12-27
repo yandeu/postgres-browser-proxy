@@ -9,10 +9,10 @@ use std::{
     net::{TcpListener, TcpStream},
     thread,
 };
-use threadpool::ThreadPool;
 
 mod args;
 mod http;
+mod image;
 mod parse;
 mod query;
 mod types;
@@ -41,6 +41,16 @@ fn handle_connection(mut stream: TcpStream, client: &mut types::PgClient, args: 
                     ("HTTP/1.1 200 OK", json, "application/json")
                 }
                 Err(e) => ("HTTP/1.1 400 Bad Request", e, "text/plain"),
+            }
+        } else if request_line.starts_with("POST /crop-image") {
+            let file = body;
+            match crate::image::crop_image(file) {
+                Ok(file) => ("HTTP/1.1 200 OK", file, "text/plain"),
+                Err(_e) => (
+                    "HTTP/1.1 400 Bad Request",
+                    String::from("Failed to crop image"),
+                    "text/plain",
+                ),
             }
         } else {
             (
@@ -81,7 +91,11 @@ fn main() {
     let manager = PostgresConnectionManager::new(args.to_db_string().parse().unwrap(), NoTls);
 
     let pg_pool = r2d2::Pool::new(manager).unwrap();
-    let thread_pool = ThreadPool::new(4);
+
+    let thread_pool = threadpool::Builder::new()
+        .thread_stack_size(1024 * 1024 * 4)
+        .num_threads(4)
+        .build();
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();

@@ -26,12 +26,50 @@ export const query = async query => {
 }
 
 /**
+ * Will crop any image to 256x256 (max. 3mb)
+ * @param {String} base64
+ * @returns {Promise<String>}
+ */
+export const cropImage = async base64 => {
+  let res = await fetch('http://localhost:3000/crop-image', {
+    method: 'POST',
+    body: base64,
+    headers: { 'Content-Type': 'text/plain' }
+  })
+  const text = await res.text()
+  if (res.status === 200) {
+    return text
+  } else {
+    showError(null, text)
+    console.error(text)
+    return ''
+  }
+}
+
+/**
+ * Converts a SQL Row to an HTMLFormElement
+ * @param {SubmitEvent} event
+ * @returns {Object.<string, any>}
+ */
+export const formDataToObject = event => {
+  const form = /** @type {HTMLFormElement} */ (event.target)
+  const formData = new FormData(form)
+  let data = {}
+  for (const [name, value] of formData.entries()) {
+    console.log(name, value, typeof value, typeof name)
+    data = { ...data, [name]: value }
+  }
+  return data
+}
+
+/**
  *
  * @param {Array<Object.<string, any>>} rows
  * @returns {HTMLTableElement|void}
  */
 export const toTable = rows => {
   if (Array.isArray(rows)) {
+    if (rows.length === 0) rows.push({ empty: 'empty' })
     let table = '<table>'
     table += '<thead><tr>'
     table += Object.keys(rows[0])
@@ -41,7 +79,10 @@ export const toTable = rows => {
     for (const row of rows) {
       table += '<tr>'
       table += Object.values(row)
-        .map(value => `<td>${value}</td>`)
+        .map(value => {
+          if (typeof value === 'string' && value.startsWith('data:image')) return `<td><img src="${value}"></td>`
+          else return `<td>${value}</td>`
+        })
         .join('')
       table += '</tr>'
     }
