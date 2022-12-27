@@ -13,6 +13,7 @@ use threadpool::ThreadPool;
 
 mod args;
 mod http;
+mod image;
 mod parse;
 mod query;
 mod types;
@@ -63,6 +64,9 @@ fn main() {
     println!("version: {}", VERSION);
     println!("source: https://github.com/yandeu/postgres-browser-proxy");
     println!();
+
+    // image test
+    crate::image::crop_image();
 
     let args = crate::args::Args::parse();
 
