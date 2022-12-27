@@ -2,6 +2,9 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   padding: 2% 8%;
 }
+form {
+  padding-bottom: 2em;
+}
 table,
 th,
 td {

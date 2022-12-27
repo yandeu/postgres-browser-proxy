@@ -95,7 +95,11 @@ fn main() {
     let manager = PostgresConnectionManager::new(args.to_db_string().parse().unwrap(), NoTls);
 
     let pg_pool = r2d2::Pool::new(manager).unwrap();
-    let thread_pool = ThreadPool::new(4);
+
+    let thread_pool = threadpool::Builder::new()
+        .thread_stack_size(1024 * 1024 * 4)
+        .num_threads(4)
+        .build();
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();

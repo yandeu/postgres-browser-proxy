@@ -69,6 +69,7 @@ export const formDataToObject = event => {
  */
 export const toTable = rows => {
   if (Array.isArray(rows)) {
+    if (rows.length === 0) rows.push({ empty: 'empty' })
     let table = '<table>'
     table += '<thead><tr>'
     table += Object.keys(rows[0])

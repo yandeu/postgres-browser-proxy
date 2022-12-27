@@ -21,34 +21,20 @@ form.addEventListener('submit', event => {
 
   var reader = new FileReader()
   reader.onload = async event => {
-    let image = event?.target?.result
-    image = await cropImage(image)
-    data.image = event?.target?.result
+    const imageData = event?.target?.result
+    const image = await cropImage(imageData)
     await query(/*sql*/ `
       INSERT INTO
         images (name, image)
       VALUES
         ('${data.name}','${image}')
       `)
-    // window.location.reload()
+    window.location.reload()
   }
   reader.readAsDataURL(data.image)
 })
 
-// await query(/*sql*/ `
-//   INSERT INTO
-//     users (username, age)
-//   VALUES
-//     ('Macy', 24),
-//     ('Terry', NULL),
-//     ('Evan', NULL);
-// `)
-
-const images = await query(/*sql*/ `SELECT * FROM images;`)
-// console.log(users)
-
-// const code = /** @type {HTMLElement} */ (document.querySelector('code'))
-// code.innerHTML = JSON.stringify(users, null, 2)
+const images = await query(/*sql*/ `SELECT * FROM images ORDER BY created_at DESC;`)
 
 document.body.append(toTable(images))
 
