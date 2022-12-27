@@ -9,7 +9,6 @@ use std::{
     net::{TcpListener, TcpStream},
     thread,
 };
-use threadpool::ThreadPool;
 
 mod args;
 mod http;
