@@ -43,6 +43,19 @@ fn handle_connection(mut stream: TcpStream, client: &mut types::PgClient, args: 
                 }
                 Err(e) => ("HTTP/1.1 400 Bad Request", e, "text/plain"),
             }
+        } else if request_line.starts_with("POST /crop-image") {
+            let file = body;
+            match crate::image::crop_image(file) {
+                Ok(file) => ("HTTP/1.1 200 OK", file, "text/plain"),
+                Err(_e) => {
+                    println!("faild to crop");
+                    (
+                        "HTTP/1.1 400 Bad Request",
+                        String::from("Failed to crop image"),
+                        "text/plain",
+                    )
+                }
+            }
         } else {
             (
                 "HTTP/1.1 404 NOT FOUND",
@@ -64,9 +77,6 @@ fn main() {
     println!("version: {}", VERSION);
     println!("source: https://github.com/yandeu/postgres-browser-proxy");
     println!();
-
-    // image test
-    crate::image::crop_image();
 
     let args = crate::args::Args::parse();
 

@@ -27,6 +27,43 @@ export const query = async query => {
 
 /**
  *
+ * @param {String} base64
+ * @returns {Promise<String>}
+ */
+export const cropImage = async base64 => {
+  let res = await fetch('http://localhost:3000/crop-image', {
+    method: 'POST',
+    body: base64,
+    headers: { 'Content-Type': 'text/plain' }
+  })
+  if (res.status === 200) {
+    return await res.text()
+  } else {
+    let text = await res.text()
+    showError(null, text)
+    console.error(text)
+    return ''
+  }
+}
+
+/**
+ *
+ * @param {SubmitEvent} event
+ * @returns {Object.<string, any>}
+ */
+export const formDataToObject = event => {
+  const form = /** @type {HTMLFormElement} */ (event.target)
+  const formData = new FormData(form)
+  let data = {}
+  for (const [name, value] of formData.entries()) {
+    console.log(name, value, typeof value, typeof name)
+    data = { ...data, [name]: value }
+  }
+  return data
+}
+
+/**
+ *
  * @param {Array<Object.<string, any>>} rows
  * @returns {HTMLTableElement|void}
  */
