@@ -78,7 +78,10 @@ export const toTable = rows => {
     for (const row of rows) {
       table += '<tr>'
       table += Object.values(row)
-        .map(value => `<td>${value}</td>`)
+        .map(value => {
+          if (typeof value === 'string' && value.startsWith('data:image')) return `<td><img src="${value}"></td>`
+          else return `<td>${value}</td>`
+        })
         .join('')
       table += '</tr>'
     }

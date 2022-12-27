@@ -25,7 +25,7 @@ pub enum Input {
 }
 
 pub fn crop_image(filepath: String) -> Result<String, Box<dyn Error>> {
-    const TARGET_SIZE: u32 = 32;
+    const TARGET_SIZE: u32 = 128;
 
     let input_mode = Input::Base64;
     let output_mode = Output::Base64;
@@ -42,7 +42,6 @@ pub fn crop_image(filepath: String) -> Result<String, Box<dyn Error>> {
             let filepath = re.replace(&filepath, "").to_string();
             let mut buffer = Vec::<u8>::new();
 
-            println!("file: {}", filepath);
             base64::decode_engine_vec(
                 filepath.trim(),
                 &mut buffer,
