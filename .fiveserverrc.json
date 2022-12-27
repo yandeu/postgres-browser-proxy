@@ -1,5 +1,5 @@
 {
-  "root": "example",
+  "root": "examples",
   "ignore": [
     "target"
   ],
