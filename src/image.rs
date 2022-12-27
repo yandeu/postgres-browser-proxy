@@ -40,9 +40,16 @@ pub fn crop_image(filepath: String) -> Result<String, Box<dyn Error>> {
         Input::Base64 => {
             let re = Regex::new(r"data:image/([\w]+);base64,").unwrap();
             let filepath = re.replace(&filepath, "").to_string();
+            let mut buffer = Vec::<u8>::new();
+
             println!("file: {}", filepath);
-            let buf = base64::decode(filepath)?;
-            image::load_from_memory(&buf)?
+            let b64 = base64::decode_engine_vec(
+                filepath.trim(),
+                &mut buffer,
+                &base64::engine::DEFAULT_ENGINE,
+            )
+            .expect("decode to buffer");
+            image::load_from_memory(&buffer).expect("should load from memory")
         }
         Input::File => {
             let binding = filepath.split(".").collect::<Vec<&str>>();
@@ -95,7 +102,8 @@ pub fn crop_image(filepath: String) -> Result<String, Box<dyn Error>> {
             let c = Cursor::new(Vec::new());
             let mut writer = BufWriter::new(c);
 
-            img.write_to(&mut writer, format)?;
+            img.write_to(&mut writer, format)
+                .expect("should write to buffer");
             let img_buf = writer.buffer();
 
             // data:image/jpeg;base64,HEX
