@@ -23,12 +23,14 @@ form.addEventListener('submit', event => {
   reader.onload = async event => {
     const imageData = event?.target?.result
     const image = await cropImage(imageData)
+
     await query(/*sql*/ `
       INSERT INTO
         images (name, image)
       VALUES
         ('${data.name}','${image}')
       `)
+
     window.location.reload()
   }
   reader.readAsDataURL(data.image)
