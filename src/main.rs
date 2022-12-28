@@ -66,6 +66,7 @@ fn handle_connection(mut stream: TcpStream, client: &mut types::PgClient, args: 
     let response = format!("{status_line}\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: {content_type}\r\nContent-Length: {length}\r\n\r\n{contents}");
 
     stream.write_all(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
 }
 
 fn main() {
