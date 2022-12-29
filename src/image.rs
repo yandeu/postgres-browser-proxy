@@ -24,8 +24,10 @@ pub enum Input {
     Base64,
 }
 
-pub fn crop_image(filepath: String) -> Result<String, Box<dyn Error>> {
-    const TARGET_SIZE: u32 = 256;
+pub fn crop_image<T: Into<String>>(filepath: T) -> Result<String, Box<dyn Error>> {
+    const TARGET_SIZE: u32 = 512;
+
+    let filepath: String = filepath.into();
 
     let input_mode = Input::Base64;
     let output_mode = Output::Base64;

@@ -52,7 +52,7 @@ fn handle_connection(mut stream: TcpStream, client: &mut types::PgClient, args: 
                 "application/javascript",
             )
         } else if request_line.starts_with("POST /query") {
-            let query = body;
+            let query = std::str::from_utf8(&body).unwrap();
             match query::make_query(query, client) {
                 Ok(data) => {
                     let json = parse::row_to_string(data);
@@ -68,7 +68,8 @@ fn handle_connection(mut stream: TcpStream, client: &mut types::PgClient, args: 
                     "text/plain",
                 )
             } else {
-                match crate::image::crop_image(body) {
+                let image = std::str::from_utf8(&body).unwrap();
+                match crate::image::crop_image(image) {
                     Ok(file) => ("HTTP/1.1 200 OK", file, "text/plain"),
                     Err(_e) => (
                         "HTTP/1.1 400 Bad Request",
@@ -115,7 +116,7 @@ fn main() {
     let pg_pool = r2d2::Pool::new(manager).unwrap();
 
     let thread_pool = threadpool::Builder::new()
-        .thread_stack_size(1024 * 1024 * 8)
+        .thread_stack_size(1024 * 1024 * 16)
         .num_threads(4)
         .build();
 
