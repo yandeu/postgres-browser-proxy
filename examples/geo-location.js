@@ -41,10 +41,14 @@ const places = await query(/*sql*/ `
 `)
 // alternative: ORDER BY ST_Distance(position::geography, ST_SetSRID(ST_Point(${ZURICH.long},${ZURICH.lat}), 4326)::geography)
 
-places.forEach(({ position: pos }) => {
-  console.log(calcCrow(ZURICH.long, ZURICH.lat, pos.long, pos.lat))
-})
-
 document.body.append(toTable(places))
+
+document.body.append(
+  toTable(
+    places.map(({ name, position: pos }) => {
+      return { name, distance: Math.round(calcCrow(ZURICH.long, ZURICH.lat, pos.long, pos.lat)) + 'KM' }
+    })
+  )
+)
 
 export {}
