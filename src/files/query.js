@@ -26,6 +26,24 @@ export const query = async query => {
 }
 
 /**
+ * Reads the image from a blob
+ * @param {SubmitEvent} event
+ * @param {Blob} image
+ * @returns {Promise<String>} base64
+ */
+export const readImage = (event, image) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = async event => {
+      const res = event?.target?.result
+      if (typeof res === 'string') resolve(res)
+      else reject(res)
+    }
+    reader.readAsDataURL(image)
+  })
+}
+
+/**
  * Will crop any image to 256x256 (max. 3mb)
  * @param {String} base64
  * @returns {Promise<String>}
