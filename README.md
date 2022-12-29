@@ -19,7 +19,7 @@ The proxy is by default running on port 3000 and is connecting to Postgres on lo
 # start postgres (using docker)
 docker run --name some-postgres -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres:15-alpine
 # (alternative) use postgres with postgis
-docker run --name some-postgres -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgis/postgis:15-3.3-alpine
+docker run --name postgis-postgres -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgis/postgis:15-3.3-alpine
 ```
 
 ### Windows

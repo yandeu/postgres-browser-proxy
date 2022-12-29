@@ -451,6 +451,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "geo-types"
+version = "0.7.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e26879b63ac36ca5492918dc16f8c1e604b0f70f884fffbd3533f89953ab1991"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -842,6 +851,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "postgis"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b52406590b7a682cadd0f0339c43905eb323568e84a2e97e855ef92645e0ec09"
+dependencies = [
+ "byteorder",
+ "bytes",
+ "postgres-types",
+]
+
+[[package]]
 name = "postgres"
 version = "0.19.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -862,7 +882,9 @@ dependencies = [
  "base64 0.20.0",
  "chrono",
  "clap",
+ "geo-types",
  "image",
+ "postgis",
  "postgres",
  "r2d2",
  "r2d2_postgres",
@@ -897,6 +919,7 @@ dependencies = [
  "bytes",
  "chrono",
  "fallible-iterator",
+ "geo-types",
  "postgres-protocol",
 ]
 

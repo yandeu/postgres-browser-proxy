@@ -1,5 +1,29 @@
+use postgis::{ewkb, LineString};
+use std::{error::Error, fmt::format, io::Read};
+
 use chrono::{DateTime, Local};
-use postgres::{types::Type, Row};
+use postgres::{
+    types::{private::BytesMut, FromSql, IsNull, ToSql, Type},
+    Row,
+};
+
+#[derive(Debug)]
+struct Point {
+    x: f64,
+    y: f64,
+}
+impl Point {
+    pub fn from_ewkb_point(point: ewkb::Point) -> Self {
+        Self {
+            x: point.x,
+            y: point.y,
+        }
+    }
+    pub fn to_string(&self) -> String {
+        format!("{}{}{}{}{}", "{\"x\":", self.x, ",\"y\":", self.y, "}")
+        // format!("\{x:{},y:{}}", self.x, self.y)
+    }
+}
 
 fn quotes<T: Into<String>>(str: T) -> String {
     format!("{}{}{}", "\"", str.into(), "\"")
@@ -40,7 +64,31 @@ pub fn row_to_string(data: Vec<Row>) -> String {
                 Type::INT4 => parse_row::<i32>(row, j, false),
                 Type::BOOL => parse_row::<bool>(row, j, false),
                 Type::FLOAT8 => parse_row::<f64>(row, j, false),
-                _ => quotes(format!("type {:#?} is unknown", *col.type_())),
+                _ => {
+                    match col.type_().name() {
+                        "geography" => {
+                            let route = row.try_get::<_, Option<ewkb::Point>>(j);
+                            let point: Point = match route {
+                                Ok(Some(geom)) => {
+                                    println!("{:?}", geom);
+                                    Point::from_ewkb_point(geom)
+                                }
+                                _ => Point { x: 0f64, y: 0f64 }, // Ok(None) => { /* Handle NULL value */ }
+                                                                 // Err(err) => {
+                                                                 //     println!("Error: {}", err)
+                                                                 // }
+                            };
+
+                            point.to_string()
+
+                            //  parse_row::<Point>(row, j, false);
+                        }
+                        n => {
+                            let r#type = format!("{}", *col.type_());
+                            quotes(format!("type '{}' is unknown", r#type))
+                        }
+                    }
+                }
             };
             json.push_str(&format!("{}:{}", key, value));
             if j < len {
