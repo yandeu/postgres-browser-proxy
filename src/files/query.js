@@ -99,6 +99,8 @@ export const toTable = rows => {
       table += Object.values(row)
         .map(value => {
           if (typeof value === 'string' && value.startsWith('data:image')) return `<td><img src="${value}"></td>`
+          else if (typeof value === 'object')
+            return `<td style="font-family: monospace; white-space: pre;">${JSON.stringify(value, null, 2)}</td>`
           else return `<td>${value}</td>`
         })
         .join('')

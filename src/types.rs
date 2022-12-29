@@ -20,6 +20,5 @@ impl LongLat {
             "{}{}{}{}{}",
             "{\"long\":", self.long, ",\"lat\":", self.lat, "}"
         )
-        // format!("\{x:{},y:{}}", self.x, self.y)
     }
 }
