@@ -1,24 +1,46 @@
 use std::{io::Read, net::TcpStream};
 
-pub fn parse_request(stream: &mut TcpStream) -> (String, String) {
-    let mut buffer = [0; 1024 * 64];
-    stream.read(&mut buffer).unwrap();
-    let request_str = std::str::from_utf8(&buffer).unwrap();
+#[derive(Debug)]
+pub enum RequestError {
+    MaxPayloadSize,
+}
 
-    let lines: Vec<String> = request_str.lines().map(|line| line.to_string()).collect();
-    let request_line = lines.first().unwrap().to_string();
+pub fn parse_request(stream: &mut TcpStream) -> Result<(String, String), RequestError> {
+    let mut data = String::new();
+    {
+        const MAX_PAYLOAD_SIZE: u32 = 1024 * 1024 * 5; // 413 Payload Too Large
+        const CHUNK_SIZE: usize = 1024 * 2; // 2kb
+        let mut bytes: u32 = 0;
+        #[allow(unused_assignments)]
+        let mut buffer = [0; CHUNK_SIZE];
+        #[allow(unused_assignments)]
+        let mut n: i32 = -1;
 
-    // read more from stream if uploading an image
-    let lines = match request_line.starts_with("POST /crop-image") {
-        true => {
-            let mut buffer = [0; 1024 * 1024 * 3];
-            stream.read(&mut buffer).unwrap();
-            let request_str = format!("{}{}", request_str, std::str::from_utf8(&buffer).unwrap());
-            let lines: Vec<String> = request_str.lines().map(|line| line.to_string()).collect();
-            lines
+        loop {
+            buffer = [0; CHUNK_SIZE];
+            match stream.read(&mut buffer) {
+                Ok(m) => {
+                    data += std::str::from_utf8(&buffer).unwrap();
+                    bytes += m as u32;
+                    n = m as i32
+                }
+                Err(e) => {
+                    println!("Stream error: {}", e);
+                    n = 0
+                }
+            };
+            if bytes >= MAX_PAYLOAD_SIZE {
+                return Err(RequestError::MaxPayloadSize);
+            }
+            if n != CHUNK_SIZE as i32 {
+                break;
+            }
         }
-        false => lines,
-    };
+    }
+    let lines: Vec<String> = data.lines().map(|line| line.to_string()).collect();
+    std::mem::drop(data);
+
+    let request_line = lines.first().unwrap().to_string();
 
     // get body
     let mut collect = false;
@@ -33,5 +55,5 @@ pub fn parse_request(stream: &mut TcpStream) -> (String, String) {
     }
     body = body.trim_matches(char::from(0)).to_string();
 
-    (request_line, body)
+    Ok((request_line, body))
 }

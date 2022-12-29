@@ -1,5 +1,6 @@
 #![allow(clippy::unused_io_amount)]
 use clap::Parser;
+use http::RequestError;
 use r2d2_postgres::{
     postgres::{Client, NoTls},
     PostgresConnectionManager,
@@ -21,8 +22,25 @@ static INDEX_HTML: &str = include_str!("files/index.html");
 static QUERY_JS: &str = include_str!("files/query.js");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+fn crate_response(status_line: &str, body: String, content_type: &str) -> String {
+    let length = body.len();
+    format!("{status_line}\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: {content_type}\r\nContent-Length: {length}\r\n\r\n{body}")
+}
+
 fn handle_connection(mut stream: TcpStream, client: &mut types::PgClient, args: crate::args::Args) {
-    let (request_line, body) = crate::http::parse_request(&mut stream);
+    let parse_result = crate::http::parse_request(&mut stream);
+
+    if parse_result.is_err() {
+        let (status_line, body) = match parse_result.err().unwrap() {
+            RequestError::MaxPayloadSize => ("HTTP/1.1 413 Payload Too Large", "PAYLOAD TOO LARGE"),
+        };
+        let response = crate_response(status_line, body.to_string(), "text/plain");
+        stream.write_all(response.as_bytes()).unwrap();
+        stream.flush().unwrap();
+        return;
+    }
+
+    let (request_line, body) = parse_result.unwrap();
 
     let (status_line, body, content_type): (&str, String, &str) =
         if request_line == "GET / HTTP/1.1" {
@@ -43,14 +61,21 @@ fn handle_connection(mut stream: TcpStream, client: &mut types::PgClient, args: 
                 Err(e) => ("HTTP/1.1 400 Bad Request", e, "text/plain"),
             }
         } else if request_line.starts_with("POST /crop-image") {
-            let file = body;
-            match crate::image::crop_image(file) {
-                Ok(file) => ("HTTP/1.1 200 OK", file, "text/plain"),
-                Err(_e) => (
+            if body.is_empty() {
+                (
                     "HTTP/1.1 400 Bad Request",
-                    String::from("Failed to crop image"),
+                    "Body is required".to_string(),
                     "text/plain",
-                ),
+                )
+            } else {
+                match crate::image::crop_image(body) {
+                    Ok(file) => ("HTTP/1.1 200 OK", file, "text/plain"),
+                    Err(_e) => (
+                        "HTTP/1.1 400 Bad Request",
+                        String::from("Failed to crop image"),
+                        "text/plain",
+                    ),
+                }
             }
         } else {
             (
@@ -60,11 +85,7 @@ fn handle_connection(mut stream: TcpStream, client: &mut types::PgClient, args: 
             )
         };
 
-    let contents = body;
-    let length = contents.len();
-
-    let response = format!("{status_line}\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: {content_type}\r\nContent-Length: {length}\r\n\r\n{contents}");
-
+    let response = crate_response(status_line, body, content_type);
     stream.write_all(response.as_bytes()).unwrap();
     stream.flush().unwrap();
 }
@@ -94,7 +115,7 @@ fn main() {
     let pg_pool = r2d2::Pool::new(manager).unwrap();
 
     let thread_pool = threadpool::Builder::new()
-        .thread_stack_size(1024 * 1024 * 4)
+        .thread_stack_size(1024 * 1024 * 8)
         .num_threads(4)
         .build();
 
