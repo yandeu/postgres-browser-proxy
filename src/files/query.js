@@ -151,3 +151,31 @@ const showError = (query, error) => {
   if (query) errorEl.innerHTML += '<br/><br/>' + '<span><small>' + query + '</small></span>'
   wrapper.append(errorEl)
 }
+
+/**
+ * This function takes in longitude and latitude of two location and returns the distance between them as the crow flies (in km)
+ * https://stackoverflow.com/a/18883819
+ * @param {number} lon1
+ * @param {number} lat1
+ * @param {number} lon2
+ * @param {number} lat2
+ * @returns
+ */
+export const calcCrow = (lon1, lat1, lon2, lat2) => {
+  const R = 6371 // km
+  const dLat = toRad(lat2 - lat1)
+  const dLon = toRad(lon2 - lon1)
+  lat1 = toRad(lat1)
+  lat2 = toRad(lat2)
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  const d = R * c
+  return d
+}
+
+// Converts numeric degrees to radians
+function toRad(Value) {
+  return (Value * Math.PI) / 180
+}
