@@ -52,7 +52,7 @@ impl<'a> FromSql<'a> for LongLat {
         let long = f64::from_le_bytes(_long);
         let lat = f64::from_le_bytes(_lat);
 
-        // see: https://github.com/andelf/rust-postgis/blob/master/src/ewkb.rs#L1008
+        // see: https://postgis.net/docs/manual-dev/using_postgis_dbmanagement.html#OpenGISWKBWKT
         let geo = match type_id & 0xff {
             0x01 => LongLat::new(long, lat, srid),
             _ => todo!(),
