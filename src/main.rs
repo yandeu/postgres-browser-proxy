@@ -14,6 +14,7 @@ use std::{
 mod args;
 mod http;
 mod image;
+mod long_lat;
 mod parse;
 mod query;
 mod types;

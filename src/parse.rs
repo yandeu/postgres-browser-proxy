@@ -1,6 +1,5 @@
-use crate::types::LongLat;
+use crate::long_lat::LongLat;
 use chrono::{DateTime, Local};
-use postgis::ewkb;
 use postgres::{types::Type, Row};
 
 fn quotes<T: Into<String>>(str: T) -> String {
@@ -45,17 +44,8 @@ pub fn row_to_string(data: Vec<Row>) -> String {
                 // custom types
                 _ => match col.type_().name() {
                     "geography" => {
-                        let point: LongLat = match row.try_get::<_, Option<ewkb::Point>>(j) {
-                            Ok(Some(geom)) => LongLat::from_ewkb_point(geom),
-                            Ok(None) => LongLat {
-                                long: 0f64,
-                                lat: 0f64,
-                            },
-                            Err(err) => {
-                                panic!("Error: {}", err)
-                            }
-                        };
-                        point.to_string()
+                        let long_lat = row.get::<_, Option<LongLat>>(j).unwrap();
+                        long_lat.to_string()
                     }
                     _ => {
                         let r#type = format!("{}", *col.type_());
