@@ -3,7 +3,7 @@ body {
   padding: 2% 8%;
 }
 form {
-  padding-bottom: 2em;
+  margin-bottom: 2em;
 }
 table,
 th,
@@ -13,9 +13,16 @@ td {
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-bottom: 2em;
 }
 th,
 td {
   text-align: left;
   padding: 4px 8px;
+}
+td img {
+  max-width: 256px;
+}
+li {
+  line-height: 1.4;
 }
