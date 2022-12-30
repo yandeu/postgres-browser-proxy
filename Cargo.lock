@@ -857,7 +857,7 @@ dependencies = [
 
 [[package]]
 name = "postgres-browser-proxy"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "base64 0.20.0",
  "chrono",
