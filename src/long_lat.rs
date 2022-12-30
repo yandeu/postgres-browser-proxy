@@ -1,5 +1,6 @@
 use std::{
     error::Error,
+    fmt,
     io::{Cursor, Read},
 };
 
@@ -16,11 +17,11 @@ impl LongLat {
     pub fn new(long: f64, lat: f64, srid: Option<i32>) -> Self {
         Self { long, lat, srid }
     }
-    pub fn to_string(&self) -> String {
-        format!(
-            "{}{}{}{}{}",
-            "{\"long\":", self.long, ",\"lat\":", self.lat, "}"
-        )
+}
+
+impl fmt::Display for LongLat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{{\"long\":\"{}\",\"lat\":\"{}\"}}", self.long, self.lat)
     }
 }
 
@@ -72,10 +73,7 @@ impl<'a> FromSql<'a> for LongLat {
     }
 
     fn accepts(ty: &Type) -> bool {
-        match ty.name() {
-            "geography" => true,
-            _ => false,
-        }
+        matches!(ty.name(), "geography")
     }
 }
 
