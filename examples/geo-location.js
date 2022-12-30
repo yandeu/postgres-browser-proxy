@@ -33,13 +33,29 @@ const ZURICH = {
   long: 8.541694,
   lat: 47.376888
 }
+
+/**
+ * Get all places within 2'000KM and sort by distance.
+ * https://postgis.net/docs/ST_DWithin.html
+ * https://postgis.net/docs/ST_Distance.html
+ *
+ * What does EPSG 4326 mean?
+ * EPSG:4326 - WGS 84, latitude/longitude coordinate system based on the Earth's center of mass, used by the Global Positioning System among others.
+ */
 const places = await query(/*sql*/ `
   SELECT *
   FROM places
-  ORDER BY position <-> 'SRID=4326;POINT(${ZURICH.long} ${ZURICH.lat})'
-  limit 5;
+  WHERE ST_DWithin (
+    position::geography,
+    ST_SetSRID(ST_Point(${ZURICH.long},${ZURICH.lat}), 4326)::geography,
+    2000000,
+    true
+  )
+  ORDER BY ST_Distance(
+    position::geography,
+    ST_SetSRID(ST_Point(${ZURICH.long},${ZURICH.lat}), 4326)::geography
+  )
 `)
-// alternative: ORDER BY ST_Distance(position::geography, ST_SetSRID(ST_Point(${ZURICH.long},${ZURICH.lat}), 4326)::geography)
 
 document.body.append(toTable(places))
 
