@@ -14,20 +14,23 @@ await query(/*sql*/ `
   );
 `)
 
-// create index for geography queries
-await query(/*sql*/ `
-  CREATE INDEX ON places USING gist (position);
-`)
+// create index for geography queries (optional)
+// await query(/*sql*/ `CREATE INDEX ON places USING gist (position);`)
 
 // POINT(long lat)
 await query(/*sql*/ `
-    INSERT INTO
-      places (name, position)
-    VALUES
-      ('New York','SRID=4326;POINT(-74.005974 40.712776)'),
-      ('Paris','SRID=4326;POINT(2.349014 48.864716)'),
-      ('Stockholm','SRID=4326;POINT(18.068581 59.329323)')
-  `)
+  INSERT INTO
+    places (name, position)
+  VALUES
+    ('New York','SRID=4326;POINT(-74.005974 40.712776)'),
+    ('Paris','SRID=4326;POINT(2.349014 48.864716)'),
+    ('Stockholm','SRID=4326;POINT(18.068581 59.329323)'),
+    ('Vienna','SRID=4326;POINT(16.363449 48.210033)'),
+    ('Geneva','SRID=4326;POINT(6.143158 46.204391)'),
+    ('San Francisco','SRID=4326;POINT(-122.431297 37.773972)'),
+    ('Tokio','SRID=4326;POINT(139.839478 35.652832)'),
+    ('London','SRID=4326;POINT(-0.118092 51.509865)')
+`)
 
 const ZURICH = {
   long: 8.541694,
@@ -35,7 +38,7 @@ const ZURICH = {
 }
 
 /**
- * Get all places within 2'000KM and sort by distance.
+ * Get all places within 20'000KM and sort by distance.
  * https://postgis.net/docs/ST_DWithin.html
  * https://postgis.net/docs/ST_Distance.html
  *
@@ -48,7 +51,7 @@ const places = await query(/*sql*/ `
   WHERE ST_DWithin (
     position::geography,
     ST_SetSRID(ST_Point(${ZURICH.long},${ZURICH.lat}), 4326)::geography,
-    2000000,
+    20000000,
     true
   )
   ORDER BY ST_Distance(
@@ -57,14 +60,14 @@ const places = await query(/*sql*/ `
   )
 `)
 
-document.body.append(toTable(places))
-
 document.body.append(
   toTable(
-    places.map(({ name, position: pos }) => {
-      return { name, distance: Math.round(calcCrow(ZURICH.long, ZURICH.lat, pos.long, pos.lat)) + 'KM' }
+    places.map(({ name: city, position: pos }) => {
+      return { city, distance: Math.round(calcCrow(ZURICH.long, ZURICH.lat, pos.long, pos.lat)) + 'KM' }
     })
   )
 )
+
+document.body.append(toTable(places))
 
 export {}
