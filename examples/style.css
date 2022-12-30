@@ -20,6 +20,9 @@ td {
   text-align: left;
   padding: 4px 8px;
 }
+td img {
+  max-width: 256px;
+}
 li {
   line-height: 1.4;
 }
