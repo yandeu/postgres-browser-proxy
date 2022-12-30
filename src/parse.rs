@@ -1,3 +1,4 @@
+use crate::long_lat::LongLat;
 use chrono::{DateTime, Local};
 use postgres::{types::Type, Row};
 
@@ -40,7 +41,17 @@ pub fn row_to_string(data: Vec<Row>) -> String {
                 Type::INT4 => parse_row::<i32>(row, j, false),
                 Type::BOOL => parse_row::<bool>(row, j, false),
                 Type::FLOAT8 => parse_row::<f64>(row, j, false),
-                _ => quotes(format!("type {:#?} is unknown", *col.type_())),
+                // custom types
+                _ => match col.type_().name() {
+                    "geography" => {
+                        let long_lat = row.get::<_, Option<LongLat>>(j).unwrap();
+                        long_lat.to_string()
+                    }
+                    _ => {
+                        let r#type = format!("{}", *col.type_());
+                        quotes(format!("type '{}' is unknown", r#type))
+                    }
+                },
             };
             json.push_str(&format!("{}:{}", key, value));
             if j < len {
