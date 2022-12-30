@@ -161,7 +161,7 @@ const showError = (query, error) => {
  * @param {number} lat1
  * @param {number} lon2
  * @param {number} lat2
- * @returns
+ * @returns {number}
  */
 export const calcCrow = (lon1, lat1, lon2, lat2) => {
   const R = 6371 // km
@@ -177,7 +177,11 @@ export const calcCrow = (lon1, lat1, lon2, lat2) => {
   return d
 }
 
-// Converts numeric degrees to radians
+/**
+ * Converts numeric degrees to radians
+ * @param {number} Value
+ * @returns {number}
+ */
 function toRad(Value) {
   return (Value * Math.PI) / 180
 }
