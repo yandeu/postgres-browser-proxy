@@ -3,7 +3,7 @@
 /**
  *
  * @param {string} query
- * @returns {Promise<Object.<string, any>>}
+ * @returns {Promise<Array<Object>>}
  */
 export const query = async query => {
   query = query.replace(/\n/gm, ' ').replace(/\s+/gm, ' ').trim()
