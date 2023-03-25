@@ -6,4 +6,6 @@ RUN apk add curl
 
 COPY ./target/x86_64-unknown-linux-musl/release/postgres-browser-proxy ./postgres-browser-proxy
 
+EXPOSE 3000
+
 CMD ["/postgres-browser-proxy"]
