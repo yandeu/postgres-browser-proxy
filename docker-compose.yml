@@ -1,0 +1,24 @@
+services:
+  proxy:
+    image: yandeu/postgres-browser-proxy:latest
+    environment:
+      HOST: 0.0.0.0
+      PG_HOST: db
+    ports:
+      - '3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgis/postgis:15-3.3-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_USER: postgres
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready', '-d', 'db_prod']
+      interval: 10s
+      timeout: 60s
+      retries: 5
+      start_period: 5s

@@ -98,7 +98,17 @@ fn main() {
     println!("source: https://github.com/yandeu/postgres-browser-proxy");
     println!();
 
-    let args = crate::args::Args::parse();
+    let mut args = crate::args::Args::parse();
+
+    // get environment variables (for docker)
+    let env_vars = std::env::vars();
+    for (key, value) in env_vars {
+        match key.as_str() {
+            "HOST" => args.set_host(value),
+            "PG_HOST" => args.set_pg_host(value),
+            _ => (),
+        }
+    }
 
     // check db connection
     let db_string = args.to_db_string();
@@ -109,8 +119,19 @@ fn main() {
         };
     });
 
-    let listener = TcpListener::bind(format!("127.0.0.1:{}", args.port())).unwrap();
-    println!("Running on http://localhost:{}/", args.port());
+    // adjust bind address
+    let mut bind_address = "127.0.0.1";
+    if args.host() == "0.0.0.0" {
+        bind_address = args.host()
+    }
+
+    let listener = TcpListener::bind(format!("{}:{}", bind_address, args.port())).unwrap();
+    println!("Running on http://{}:{}/", args.host(), args.port());
+    println!(
+        "Connecting to http://{}:{}/",
+        args.pg_host(),
+        args.pg_port()
+    );
 
     let manager = PostgresConnectionManager::new(args.to_db_string().parse().unwrap(), NoTls);
 

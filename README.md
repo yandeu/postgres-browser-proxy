@@ -42,10 +42,11 @@ Usage: postgres-browser-proxy.exe [OPTIONS]
 
 Options:
       --host <HOST>          [default: localhost]
+      --port <PORT>          [default: 3000]
+      --pg-host <PG_HOST>    [default: localhost]
+      --pg-port <PG_PORT>    [default: 5432]
       --user <USER>          [default: postgres]
       --password <PASSWORD>  [default: mysecretpassword]
-      --port <PORT>          [default: 3000]
-      --pg-port <PG_PORT>    [default: 5432]
   -h, --help                 Print help information
   -V, --version              Print version information
 ```

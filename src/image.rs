@@ -62,11 +62,11 @@ pub fn crop_image<T: Into<String>>(filepath: T) -> Result<String, Box<dyn Error>
     match crop_mode {
         CropMode::Cover => {
             let min = cmp::min(width, height);
-            let ratio = (min as f32 / TARGET_SIZE as f32) as f32;
+            let ratio = (min as f32 / TARGET_SIZE as f32).round();
 
             // resize
-            width = (width as f32 / ratio as f32).round() as u32;
-            height = (height as f32 / ratio as f32).round() as u32;
+            width = (width as f32 / ratio).round() as u32;
+            height = (height as f32 / ratio).round() as u32;
             img = img.resize(width, height, image::imageops::FilterType::Nearest);
 
             // crop
