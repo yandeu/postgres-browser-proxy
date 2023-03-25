@@ -123,7 +123,13 @@ fn main() {
         };
     });
 
-    let listener = TcpListener::bind(format!("127.0.0.1:{}", args.port())).unwrap();
+    // adjust bind address
+    let mut bind_address = "127.0.0.1";
+    if args.host() == "0.0.0.0" {
+        bind_address = args.host()
+    }
+
+    let listener = TcpListener::bind(format!("{}:{}", bind_address, args.port())).unwrap();
     println!("Running on http://{}:{}/", args.host(), args.port());
     println!(
         "Connecting to http://{}:{}/",
