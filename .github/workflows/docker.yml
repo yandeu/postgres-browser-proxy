@@ -8,6 +8,9 @@ on:
       - main
       - docker
 
+env:
+  RUSTFLAGS: '-Dwarnings'
+
 jobs:
   build:
     runs-on: ubuntu-latest
