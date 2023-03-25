@@ -6,7 +6,8 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
     image: postgis/postgis:15-3.3-alpine
     ports:
@@ -14,3 +15,9 @@ services:
     environment:
       POSTGRES_PASSWORD: mysecretpassword
       POSTGRES_USER: postgres
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready', '-d', 'db_prod']
+      interval: 10s
+      timeout: 60s
+      retries: 5
+      start_period: 5s
