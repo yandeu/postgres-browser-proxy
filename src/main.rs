@@ -104,14 +104,11 @@ fn main() {
     // get environment variables (for docker)
     let env_vars = env::vars();
     for (key, value) in env_vars {
-        if key == "HOST" {
-            args.set_host(value);
+        match key.as_str() {
+            "HOST" => args.set_host(value),
+            "PG_HOST" => args.set_pg_host(value),
+            _ => (),
         }
-        //
-        else if key == "PG_HOST" {
-            args.set_pg_host(value);
-        }
-        // println!("{} = {:?}", key, value);
     }
 
     // check db connection
