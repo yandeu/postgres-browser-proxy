@@ -107,6 +107,10 @@ fn main() {
         if key == "HOST" {
             args.set_host(value);
         }
+        //
+        else if key == "PG_HOST" {
+            args.set_pg_host(value);
+        }
         // println!("{} = {:?}", key, value);
     }
 
@@ -120,8 +124,12 @@ fn main() {
     });
 
     let listener = TcpListener::bind(format!("127.0.0.1:{}", args.port())).unwrap();
-    println!("Running on http://localhost:{}/", args.port());
-    println!("Connecting to http://{}:{}/", args.host(), args.pg_port());
+    println!("Running on http://{}:{}/", args.host(), args.port());
+    println!(
+        "Connecting to http://{}:{}/",
+        args.pg_host(),
+        args.pg_port()
+    );
 
     let manager = PostgresConnectionManager::new(args.to_db_string().parse().unwrap(), NoTls);
 
