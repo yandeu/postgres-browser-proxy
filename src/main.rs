@@ -6,6 +6,7 @@ use r2d2_postgres::{
     PostgresConnectionManager,
 };
 use std::{
+    env,
     io::Write,
     net::{TcpListener, TcpStream},
     thread,
@@ -98,7 +99,16 @@ fn main() {
     println!("source: https://github.com/yandeu/postgres-browser-proxy");
     println!();
 
-    let args = crate::args::Args::parse();
+    let mut args = crate::args::Args::parse();
+
+    // get environment variables (for docker)
+    let env_vars = env::vars();
+    for (key, value) in env_vars {
+        if key == "HOST" {
+            args.set_host(value);
+        }
+        // println!("{} = {:?}", key, value);
+    }
 
     // check db connection
     let db_string = args.to_db_string();
@@ -111,6 +121,7 @@ fn main() {
 
     let listener = TcpListener::bind(format!("127.0.0.1:{}", args.port())).unwrap();
     println!("Running on http://localhost:{}/", args.port());
+    println!("Connecting to http://{}:{}/", args.host(), args.pg_port());
 
     let manager = PostgresConnectionManager::new(args.to_db_string().parse().unwrap(), NoTls);
 

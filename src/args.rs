@@ -15,8 +15,17 @@ pub struct Args {
     pg_port: String,
 }
 impl Args {
+    pub fn set_host(&mut self, host: String) {
+        self.host = host;
+    }
+    pub fn host(&self) -> &str {
+        &self.host
+    }
     pub fn port(&self) -> &str {
         &self.port
+    }
+    pub fn pg_port(&self) -> &str {
+        &self.pg_port
     }
     pub fn to_db_string(&self) -> String {
         format!(
