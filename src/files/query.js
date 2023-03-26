@@ -3,11 +3,12 @@
 /**
  *
  * @param {string} query
+ * @param {string} [url]
  * @returns {Promise<Array<Object>>}
  */
-export const query = async query => {
+export const query = async (query, url = 'http://localhost:3000/') => {
   query = query.replace(/\n/gm, ' ').replace(/\s+/gm, ' ').trim()
-  const res = await fetch('http://localhost:3000/query', {
+  const res = await fetch(url + 'query', {
     method: 'POST',
     body: query,
     headers: { 'Content-Type': 'text/plain' }
@@ -46,10 +47,11 @@ export const readImage = (event, image) => {
 /**
  * Will crop any image to 256x256 (max. 3mb)
  * @param {String} base64
+ * @param {String} [url]
  * @returns {Promise<String>}
  */
-export const cropImage = async base64 => {
-  let res = await fetch('http://localhost:3000/crop-image', {
+export const cropImage = async (base64, url = 'http://localhost:3000/') => {
+  let res = await fetch(url + 'crop-image', {
     method: 'POST',
     body: base64,
     headers: { 'Content-Type': 'text/plain' }
@@ -184,4 +186,32 @@ export const calcCrow = (lon1, lat1, lon2, lat2) => {
  */
 function toRad(Value) {
   return (Value * Math.PI) / 180
+}
+
+export class Proxy {
+  url
+
+  /**
+   * @param {String} url
+   */
+  constructor(url) {
+    this.url = url
+    if (!this.url.endsWith('/')) this.url += '/'
+  }
+
+  /**
+   * @param {String} q
+   * @returns {Promise<Array<Object>>}
+   */
+  async query(q) {
+    return await query(q, this.url)
+  }
+
+  /**
+   * @param {String} base64
+   * @returns {Promise<String>}
+   */
+  async cropImage(base64) {
+    return await cropImage(base64, this.url)
+  }
 }
