@@ -5,6 +5,7 @@ use r2d2_postgres::{
     postgres::{Client, NoTls},
     PostgresConnectionManager,
 };
+use rnglib::{Language, RNG};
 use std::{
     io::Write,
     net::{TcpListener, TcpStream},
@@ -44,7 +45,26 @@ fn handle_connection(mut stream: TcpStream, client: &mut types::PgClient, args: 
     let (request_line, body) = parse_result.unwrap();
 
     let (status_line, body, content_type): (&str, String, &str) =
-        if request_line == "GET / HTTP/1.1" {
+        if request_line == "GET /create-new-database HTTP/1.1" {
+            use rand::seq::SliceRandom;
+            let mut rng = rand::thread_rng();
+            let lang = [Language::Elven, Language::Fantasy, Language::Goblin].choose(&mut rng);
+            let rng_name = RNG::from(lang.unwrap());
+            let name = rng_name.generate_name().to_lowercase();
+
+            let create_db = format!("CREATE DATABASE {}", name);
+            let create_user = format!("CREATE USER {} WITH ENCRYPTED PASSWORD '{}'", name, name);
+            let grant_access = format!("GRANT ALL PRIVILEGES ON DATABASE {} TO {}", name, name);
+
+            match query::make_multiple_queries(vec![create_db, create_user, grant_access], client) {
+                Ok(_) => (
+                    "HTTP/1.1 200 OK",
+                    format!("New database created: {}", name),
+                    "text/plain",
+                ),
+                Err(e) => ("HTTP/1.1 400 Bad Request", e.to_string(), "text/plain"),
+            }
+        } else if request_line == "GET / HTTP/1.1" {
             ("HTTP/1.1 200 OK", INDEX_HTML.to_string(), "text/html")
         } else if request_line.starts_with("GET /query.js") {
             (
