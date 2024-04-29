@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   proxy:
     image: yandeu/postgres-browser-proxy:latest
@@ -7,8 +9,15 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+    deploy:
+      resources:
+        limits:
+          memory: 16M
+        reservations:
+          memory: 4M
+      replicas: 2
+
   db:
     image: postgis/postgis:15-3.3-alpine
     ports:
@@ -16,6 +25,13 @@ services:
     environment:
       POSTGRES_PASSWORD: mysecretpassword
       POSTGRES_USER: postgres
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 64M
+      replicas: 1
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready', '-d', 'db_prod']
       interval: 10s
