@@ -44,7 +44,7 @@ fn handle_connection(mut stream: TcpStream, client: &mut types::PgClient, args: 
     let (request_line, body) = parse_result.unwrap();
 
     let (status_line, body, content_type): (&str, String, &str) =
-        if request_line == "GET / HTTP/1.1" {
+        if request_line.starts_with("GET / HTTP/") {
             ("HTTP/1.1 200 OK", INDEX_HTML.to_string(), "text/html")
         } else if request_line.starts_with("GET /query.js") {
             (
