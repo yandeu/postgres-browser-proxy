@@ -43,7 +43,7 @@ impl Args {
     }
     pub fn to_db_string(&self) -> String {
         format!(
-            "host={} user={} password={}",
+            "host={} user={} password={} dbname=postgres",
             self.pg_host, self.user, self.password
         )
     }
