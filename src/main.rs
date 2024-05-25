@@ -106,6 +106,8 @@ fn main() {
         match key.as_str() {
             "HOST" => args.set_host(value),
             "PG_HOST" => args.set_pg_host(value),
+            "PG_USER" => args.set_user(value),
+            "PG_PASSWORD" => args.set_password(value),
             _ => (),
         }
     }

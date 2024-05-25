@@ -35,6 +35,12 @@ impl Args {
     pub fn set_pg_host(&mut self, pg_host: String) {
         self.pg_host = pg_host;
     }
+    pub fn set_user(&mut self, user: String) {
+        self.user = user;
+    }
+    pub fn set_password(&mut self, password: String) {
+        self.password = password;
+    }
     pub fn to_db_string(&self) -> String {
         format!(
             "host={} user={} password={}",
